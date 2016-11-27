@@ -69,6 +69,7 @@ var spriteSausage
 var spriteKnife
 var spriteDough
 var spriteTomatoSliceGroup = []
+var spriteCheaseSliceGroup = []
 var spriteSausageSliceGroup = []
 var sauseges = ["media/sausage.png","media/sausage1.png","media/sausage2.png","media/sausage3.png","media/sausage4.png",]
 var tomatos = ["media/tomato_half.png","media/tomato_half.png","media/tomato_half.png","media/tomato_half.png","media/tomato_half.png",]
@@ -232,6 +233,9 @@ function showGlass() {
     stage.addChild(spriteGlass)
     setMouseListeners(spriteGlass)
     spriteGlass.visible = false
+}
+function showCheeseParticles() {
+
 }
 function showEggs() {
 	spriteEggs = new PIXI.Sprite(getTexture("media/eggs.png"))
@@ -740,6 +744,41 @@ function onDragMove(event) {
 					}
 				}
 			}
+            // if (false && spriteChease && spriteChease.visible && spriteChease.sliceCount != 5 && !spriteChease.crushed) {
+            //     if ((this.x > spriteChease.x + spriteChease.width || this.x < spriteChease.x) &&
+            //         this.y < spriteChease.y && this.y + this.height/2 > spriteChease.y + spriteChease.height && !spriteChease.cutting) {
+            //         spriteChease.cutting = true
+            //         this.cheaseCutX = this.x
+            //         this.cheaseCutY = this.y
+            //     } else if (Math.abs(this.y - this.cheaseCutY) > 50 && spriteChease.cutting) {
+            //         spriteChease.cutting = false
+            //     } else if (spriteChease.cutting &&
+            //         (this.x > spriteChease.x + spriteChease.height && this.cheaseCutX < spriteChease.x ||
+            //             this.cheaseCutX > spriteChease.x + spriteChease.height && this.x < spriteChease.x)) {
+            //         spriteChease.cutting = false
+            //         spriteChease.cutted = true
+
+            //         var spriteCheaseSlice = new PIXI.Sprite(getTexture("media/chease_slice.png"))
+            //         spriteCheaseSlice.interactive = true
+            //         spriteCheaseSlice.offset = spriteChease.sliceCount * 10
+            //         setSize(spriteCheaseSlice, 10)
+            //         spriteCheaseSlice.x = spriteChease.x
+            //         spriteCheaseSlice.y = spriteChease.y + spriteChease.height + spriteCheaseSlice.offset
+            //         spriteCheaseSlice.anchor.x = .5
+            //         spriteCheaseSlice.anchor.y = .5
+            //         spriteCheaseSliceGroup[spriteChease.sliceCount] = spriteCheaseSlice
+            //         stage.addChild(spriteCheaseSlice)
+            //         renderer.render(stage)
+            //         setMouseListeners(spriteCheaseSlice)
+                    
+            //         spriteChease.sliceCount++
+            //         if (spriteChease.sliceCount == 5) {
+            //             spriteSausage.visible = true
+
+            //             stage.removeChild(spriteChease)
+            //             renderer.render(stage)
+            //         }
+            //     }
 			if (spriteSausage && spriteSausage.visible && spriteSausage.sliceCount != 5) {
 				if ((this.x > spriteSausage.x + spriteSausage.width || this.x < spriteSausage.x) &&
 					this.y < spriteSausage.y && this.y + this.height/2 > spriteSausage.y + spriteSausage.height && !spriteSausage.cutting) {
