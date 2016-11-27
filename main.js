@@ -40,6 +40,12 @@ PIXI.utils.TextureCache["media/burnt_pizza.png"]
 PIXI.utils.TextureCache["media/mat.png"]
 PIXI.utils.TextureCache["media/nori.png"]
 PIXI.utils.TextureCache["media/semga.png"]
+PIXI.utils.TextureCache["media/semga1.png"]
+PIXI.utils.TextureCache["media/semga2.png"]
+PIXI.utils.TextureCache["media/semga3.png"]
+PIXI.utils.TextureCache["media/semga_slice.png"]
+PIXI.utils.TextureCache["media/ris.png"]
+PIXI.utils.TextureCache["media/lump.png"]
 var stage = new PIXI.Container()
 
 renderer.render(stage)
@@ -50,6 +56,9 @@ var loader = PIXI.loader
 var resources = PIXI.loader.resources
 var TextureCache = PIXI.utils.TextureCache
 
+var spriteNori
+var spriteRis
+var spriteLump
 var spriteSemga
 var spriteMat
 var spriteEggs
@@ -71,8 +80,10 @@ var spriteDough
 var spriteTomatoSliceGroup = []
 var spriteCheaseSliceGroup = []
 var spriteSausageSliceGroup = []
+var spriteSemgaSliceGroup = []
 var sauseges = ["media/sausage.png","media/sausage1.png","media/sausage2.png","media/sausage3.png","media/sausage4.png",]
 var tomatos = ["media/tomato_half.png","media/tomato_half.png","media/tomato_half.png","media/tomato_half.png","media/tomato_half.png",]
+var semgas = ["media/semga.png","media/semga1.png","media/semga2.png","media/semga3.png",]
 
 function setup() {
 	//работать через json
@@ -92,6 +103,8 @@ function setup() {
 	stage.addChild(spriteBoard)
 
 	showMat()
+
+	showRis()
 
 	showSemga()
 
@@ -120,29 +133,60 @@ function setup() {
 }
 function showMat() {
 	spriteMat = new PIXI.Sprite(getTexture("media/mat.png"))
-	setSize(spriteMat, 15)
-	spriteMat.x = spriteMat.width / 2
-	spriteMat.y = spriteBoard.y + spriteMat.height/2
+	spriteMat.id = "mat"
+	spriteMat.interactive = true
+	setSize(spriteMat, 25)
+	spriteMat.defHeight = spriteMat.height
+	spriteMat.risCount = 0
+	spriteMat.x = spriteMat.width / 4
+	spriteMat.y = spriteBoard.y
 
-	var spriteNori = new PIXI.Sprite(getTexture("media/nori.png"))
+	spriteNori = new PIXI.Sprite(getTexture("media/nori.png"))
 	setSize(spriteNori, 20)
-	spriteNori.x = spriteMat.width * .05
-	spriteNori.y = spriteMat.height * .05
+	spriteNori.x = spriteMat.width * .04
+	spriteNori.y = 0
 
 	spriteMat.addChild(spriteNori)
 	stage.addChild(spriteMat)
 	spriteMat.visible = false
+	setMouseListeners(spriteMat)
+}
+function showRis() {
+	spriteRis = new PIXI.Sprite(getTexture("media/ris.png"))
+	setSize(spriteRis, 20)
+	spriteRis.x = getWidth(40)
+	spriteRis.y = getBottom(spriteRis)
+
+	spriteLump = new PIXI.Sprite(getTexture("media/lump.png"))
+	spriteLump.id = "lump"
+	spriteLump.fixed = true
+	setSize(spriteLump, 5)
+	spriteLump.defX = spriteRis.x + spriteLump.width/2
+	spriteLump.defY = spriteRis.y + spriteLump.height
+	spriteLump.anchored = true
+	spriteLump.anchor.x = 0.5
+	spriteLump.anchor.y = 0.5
+
+	recoveryLump()
+
+	stage.addChild(spriteRis)
+	stage.addChild(spriteLump)
+	setMouseListeners(spriteLump)
+	spriteRis.visible = false
+	spriteLump.visible = false
 }
 function showSemga() {
 	spriteSemga = new PIXI.Sprite(getTexture("media/semga.png"))
 	spriteSemga.interactive = true
 	setSize(spriteSemga, 10)
+	spriteSemga.sliceCount = 0
+	spriteSemga.group = spriteSemgaSliceGroup
 	spriteSemga.x = spriteSemga.width / 2
 	spriteSemga.y = windowHeight / 2
 
 	stage.addChild(spriteSemga)
 	setMouseListeners(spriteSemga)
-	spriteMat.visible = false
+	spriteSemga.visible = false
 }
 function showSheet() {
 	spriteSheet = new PIXI.Sprite(getTexture("media/sheet.png"))
@@ -196,7 +240,6 @@ function showPan() {
 	spritePan.x = getWidth(10)
 	spritePan.y = getWidth(10)
 	setSize(spritePan, 40)
-	clog("XA = "+spritePan.width+" "+spritePan.height)
 	stage.addChild(spritePan)
 
 	var radius = 5
@@ -204,7 +247,7 @@ function showPan() {
 	circlePan.beginFill(0x0)
 	circlePan.drawCircle(0, 0, radius)
 	circlePan.endFill()
-	circlePan.alpha = 1
+	circlePan.alpha = 0
 	spritePan.addChild(circlePan)
 	circlePan.x = spritePan.width * 0.45
 	circlePan.y = spritePan.height * 0.5
@@ -258,9 +301,7 @@ function showEggs() {
 	spriteEgg.anchored = true
 	spriteEgg.anchor.x = 0.5
 	spriteEgg.anchor.y = 0.5
-	spriteEgg.floor = 0
 	spriteEgg.cracked = false
-	spriteEgg.lastVelocity = 0
 
 	stage.addChild(spriteEgg)
 	setMouseListeners(spriteEgg)
@@ -390,6 +431,12 @@ PIXI.loader
 .add("media/mat.png")
 .add("media/nori.png")
 .add("media/semga.png")
+.add("media/semga1.png")
+.add("media/semga2.png")
+.add("media/semga3.png")
+.add("media/semga_slice.png")
+.add("media/ris.png")
+.add("media/lump.png")
 .load(setup)
 
 requestAnimationFrame(animate)
@@ -438,6 +485,52 @@ function animate() {
 					spriteSausageSliceGroup[i].visible = false
 					spriteOven.visible = true
 				}
+			}
+		}
+		//ready = true
+		for (var i = 0; i < 4; i++) {
+			if (spriteSemgaSliceGroup[i] && spriteSemgaSliceGroup[i].interactive && spriteSemgaSliceGroup[i].dropped)
+				if (fallen(spriteSemgaSliceGroup[i], 0, spriteMat))
+					spriteSemgaSliceGroup[i].ready = hitTestRectangles(spriteSemgaSliceGroup[i], spriteMat)
+			if (spriteSemgaSliceGroup[i] && spriteSemgaSliceGroup[i].ready) {
+				var offsetX = spriteMat.width * .1
+				var offsetY = spriteMat.height * .6
+				var miniofset = spriteMat.width * .1
+				setSize(spriteSemgaSliceGroup[i], 7)
+				var stepX = spriteSemgaSliceGroup[i].width
+				var stepY = spriteSemgaSliceGroup[i].height * .6
+				spriteSemgaSliceGroup[i].interactive = false
+				spriteSemgaSliceGroup[i].fixed = true
+				stage.removeChild(spriteSemgaSliceGroup[i])
+				spriteNori.addChild(spriteSemgaSliceGroup[i])
+				spriteSemgaSliceGroup[i].x = offsetX + stepX * (i%2) + miniofset * (1-Math.floor(i/2)) + spriteNori.x
+				spriteSemgaSliceGroup[i].y = offsetY + stepY * Math.floor(i/2) + spriteNori.x
+			}
+
+		}
+		/*if (ready) {
+			var offsetX = spriteMat.width * .18
+			var offsetY = spriteMat.height * .9
+			var miniofset = spriteMat.width * .2
+			for (var i = 0; i < 4; i++) {
+				setSize(spriteSemgaSliceGroup[i], 7)
+				var stepX = spriteSemgaSliceGroup[i].width
+				var stepY = spriteSemgaSliceGroup[i].height * .6
+				spriteSemgaSliceGroup[i].interactive = false
+				spriteSemgaSliceGroup[i].fixed = true
+				stage.removeChild(spriteSemgaSliceGroup[i])
+				spriteMat.addChild(spriteSemgaSliceGroup[i])
+				spriteSemgaSliceGroup[i].x = offsetX + stepX * (i%2) + miniofset * (1-Math.floor(i/2))
+				spriteSemgaSliceGroup[i].y = offsetY + stepY * Math.floor(i/2)
+			}
+		}*/
+
+
+		if (spriteLump && spriteLump.dropped) {
+			fallen(spriteLump, 0.1, null)
+			if (hitTestRectangles(spriteLump, spriteMat)) {
+				fillMat()
+				recoveryLump()
 			}
 		}
 
@@ -513,7 +606,31 @@ function refillGlass() {
     spriteGlass.texture = getTexture("media/glass_full.png")
     spriteGlass.empty = false
 }
+function fillMat() {
+	if (spriteMat.risCount > 2) {
+		spriteMat.ready = true
+		return
+	}
+	spriteMat.risCount++
 
+	var spriteNewLump = new PIXI.Sprite(getTexture("media/lump.png"))
+	spriteNewLump.x = (spriteLump.x - spriteMat.x)
+	spriteNewLump.y = (spriteLump.y - spriteMat.y)
+
+	setSize(spriteNewLump, 5)
+	spriteNewLump.anchor.x = 0.5
+	spriteNewLump.anchor.y = 0.5
+
+	spriteMat.addChild(spriteNewLump)
+	renderer.render(stage)
+}
+function recoveryLump() {
+	spriteLump.interactive = true
+	spriteLump.dropped = false
+	spriteLump.alpha = 1
+	spriteLump.x = spriteLump.defX
+	spriteLump.y = spriteLump.defY
+}
 function recoveryTomato() {
 	spriteTomato.x += spriteTomato.width/4 // нужно немножечко подвинуть обратно
 	spriteTomato.texture = getTexture("media/tomato.png")
@@ -646,20 +763,30 @@ function onDragMove(event) {
 		if (this.id == "tomato" && this.sliceCount > 0 && this.sliceCount < 5)
 			return // нельзя брать томат, когда начал его резать
 
-		resize(this)
-
 		var newPosition = this.data.getLocalPosition(this.parent)
 		var difX = newPosition.x - this.lastMouseX
 		var difY = newPosition.y - this.lastMouseY
-		this.position.x += difX
-		this.position.y += difY
-		this.lastMouseX = newPosition.x
-		this.lastMouseY = newPosition.y
-		this.vx = difX
-		this.vy = difY
+
+		if (this.id != "mat") {
+			resize(this)
+
+			this.position.x += difX
+			this.position.y += difY
+			this.lastMouseX = newPosition.x
+			this.lastMouseY = newPosition.y
+			this.vx = difX
+			this.vy = difY
+		}
 
 		var velocity = Math.abs(difX + difY) // я знаю, что нужно корень суммы квадратов, пусть так
-		if (this.id == "glass")
+		if (this.id == "mat") {
+			if (this.ready) {
+				if (this.height > this.defHeight/5 && difY < 0) {
+					this.height += difY/2
+				}
+				//if (this.height <= this.defHeight/5)
+			}
+		} else if (this.id == "glass")
 			this.rotation += -difX/100 * Math.sign(Math.cos(this.rotation)) // отклоняем стакан от равновесия
 		else if (this.id == "dough") {
 			if (!spriteDough.ismaximum && Math.abs(difX) > 20) {
@@ -673,10 +800,10 @@ function onDragMove(event) {
 				spriteOven.y -= difY
 			if (spriteOven.y <= 5 && !spriteOven.ready && !spriteOven.closed) {
 				spriteOven.closed = true
-				spriteMat.visible = true
-				//setTimeout("fire()", Math.random() * 20000) todo
+				//spriteMat.visible = true
+				setTimeout("fire()", 5000+ Math.random() * 5000)
 			}
-			if (spriteOven.ready && difY > 30 && !spriteOven.dead) {
+			if (spriteOven.ready && spriteOven.y > 100 && !spriteOven.dead) {
 				spriteOven.opening = true
 				//spriteDough.texture ...
 			}
@@ -704,45 +831,7 @@ function onDragMove(event) {
 				}
 			}
 			if (spriteTomato && spriteTomato.visible && spriteTomato.sliceCount != 5 && !spriteTomato.crushed) {
-				cut(this, spriteTomato, 5, tomatos, "media/tomato_slice.png")
-			}
-			if (false && spriteTomato && spriteTomato.visible && spriteTomato.sliceCount != 5 && !spriteTomato.crushed) {
-				if ((this.x > spriteTomato.x + spriteTomato.width || this.x < spriteTomato.x) &&
-					this.y < spriteTomato.y && this.y + this.height/2 > spriteTomato.y + spriteTomato.height && !spriteTomato.cutting) {
-					spriteTomato.cutting = true
-					this.tomatoCutX = this.x
-					this.tomatoCutY = this.y
-				} else if (Math.abs(this.y - this.tomatoCutY) > 50 && spriteTomato.cutting) {
-					spriteTomato.cutting = false
-				} else if (spriteTomato.cutting &&
-					(this.x > spriteTomato.x + spriteTomato.height && this.tomatoCutX < spriteTomato.x ||
-						this.tomatoCutX > spriteTomato.x + spriteTomato.height && this.x < spriteTomato.x)) {
-					spriteTomato.cutting = false
-					spriteTomato.cutted = true
-					if (spriteTomato.sliceCount == 0)
-						spriteTomato.texture = getTexture("media/tomato_half.png")
-
-					var spriteTomatoSlice = new PIXI.Sprite(getTexture("media/tomato_slice.png"))
-					spriteTomatoSlice.interactive = true
-					spriteTomatoSlice.offset = spriteTomato.sliceCount * 10
-					setSize(spriteTomatoSlice, 10)
-					spriteTomatoSlice.x = spriteTomato.x
-					spriteTomatoSlice.y = spriteTomato.y + spriteTomato.height + spriteTomatoSlice.offset
-					spriteTomatoSlice.anchor.x = .5
-					spriteTomatoSlice.anchor.y = .5
-					spriteTomatoSliceGroup[spriteTomato.sliceCount] = spriteTomatoSlice
-					stage.addChild(spriteTomatoSlice)
-					renderer.render(stage)
-					setMouseListeners(spriteTomatoSlice)
-					
-					spriteTomato.sliceCount++
-					if (spriteTomato.sliceCount == 5) {
-						spriteSausage.visible = true
-
-						stage.removeChild(spriteTomato)
-						renderer.render(stage)
-					}
-				}
+				cut(this, spriteTomato, 5, tomatos, "media/tomato_slice.png", 0, 10)
 			}
             // if (false && spriteChease && spriteChease.visible && spriteChease.sliceCount != 5 && !spriteChease.crushed) {
             //     if ((this.x > spriteChease.x + spriteChease.width || this.x < spriteChease.x) &&
@@ -780,53 +869,17 @@ function onDragMove(event) {
             //         }
             //     }
 			if (spriteSausage && spriteSausage.visible && spriteSausage.sliceCount != 5) {
-				if ((this.x > spriteSausage.x + spriteSausage.width || this.x < spriteSausage.x) &&
-					this.y < spriteSausage.y && this.y + this.height/2 > spriteSausage.y + spriteSausage.height && !spriteSausage.cutting) {
-					spriteSausage.cutting = true
-					this.sausageCutX = this.x
-					this.sausageCutY = this.y
-				} else if (Math.abs(this.y - this.sausageCutY) > 50 && spriteSausage.cutting) {
-					spriteSausage.cutting = false
-				} else if (spriteSausage.cutting &&
-					(this.x > spriteSausage.x + spriteSausage.height && this.sausageCutX < spriteSausage.x ||
-						this.sausageCutX > spriteSausage.x + spriteSausage.height && this.x < spriteSausage.x)) {
-					spriteSausage.cutting = false
-					spriteSausage.cutted = true
-					if (spriteSausage.sliceCount < 4)
-						spriteSausage.texture = getTexture(sauseges[spriteSausage.sliceCount+1])
-
-					var spriteSausageSlice = new PIXI.Sprite(getTexture("media/sausage_slice.png"))
-					spriteSausageSlice.interactive = true
-					spriteSausageSlice.offset = spriteSausage.sliceCount * 10
-					setSize(spriteSausageSlice, 8)
-					spriteSausageSlice.x = spriteSausage.x + spriteSausage.width - spriteSausageSlice.offset
-					spriteSausageSlice.y = spriteSausage.y + spriteSausage.height
-					spriteSausageSlice.anchor.x = .5
-					spriteSausageSlice.anchor.y = .5
-					spriteSausageSliceGroup[spriteSausage.sliceCount] = spriteSausageSlice
-					stage.addChild(spriteSausageSlice)
-					renderer.render(stage)
-					setMouseListeners(spriteSausageSlice)
-					
-					spriteSausage.sliceCount++
-					if (spriteSausage.sliceCount == 5) {
-						spriteSheet.visible = true
-						spriteFlour.texture = getTexture("media/dough.png")
-						spriteFlour.x -= 20
-						spriteFlour.y -= 20
-						spriteFlour.interactive = true
-						setMouseListeners(spriteFlour)
-						spritePan.whithDough = true
-
-						stage.removeChild(spriteSausage)
-						renderer.render(stage)
-					}
-				}
+				cut(this, spriteSausage, 5, sauseges, "media/sausage_slice.png", 10, 0)
 			}
+			if (spriteSemga && spriteSemga.visible && spriteSemga.sliceCount != 4) {
+				cut(this, spriteSemga, 4, semgas, "media/semga_slice.png", 0, 10)
+			}
+		} else if (this.id == "lump") {
+			spriteLump.alpha = 1
 		}
 	}
 }
-function cut(knife, obj, count, textures, texture) {
+function cut(knife, obj, count, textures, texture, offsetX=0, offsetY=0) {
 	if ((knife.x > obj.x + obj.width || knife.x < obj.x) &&
 		knife.y < obj.y && knife.y + knife.height/2 > obj.y + obj.height && !obj.cutting) {
 		obj.cutting = true
@@ -839,15 +892,16 @@ function cut(knife, obj, count, textures, texture) {
 			knife.cutX > obj.x + obj.height && knife.x < obj.x)) {
 		obj.cutting = false
 		obj.cutted = true
-		if (obj.sliceCount < 4)
-			obj.texture = getTexture(textures[obj.sliceCount+1])
+		if (obj.sliceCount < count-1) // так
+			obj.texture = getTexture(textures[obj.sliceCount+1]) // надо
 
 		var objSlice = new PIXI.Sprite(getTexture(texture))
 		objSlice.interactive = true
-		objSlice.offset = obj.sliceCount * 10
+		objSlice.offsetX = obj.sliceCount * offsetX * 2
+		objSlice.offsetY = obj.sliceCount * offsetY
 		setSize(objSlice, 8)
-		objSlice.x = obj.x + obj.width - objSlice.offset
-		objSlice.y = obj.y + obj.height
+		objSlice.x = obj.x + obj.width - objSlice.offsetX
+		objSlice.y = obj.y + obj.height - objSlice.offsetY
 		obj.group[obj.sliceCount] = objSlice
 		stage.addChild(objSlice)
 		setMouseListeners(objSlice)
