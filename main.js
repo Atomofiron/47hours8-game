@@ -219,19 +219,19 @@ function showPan() {
 	setMouseListeners(spritePan)
 }
 function showGlass() {
-	spriteGlass = new PIXI.Sprite(getTexture("media/glass_full.png"))
-	spriteGlass.id = "glass"
-	spriteGlass.interactive = true
-	spriteGlass.r = 0
-	setSize(spriteGlass, 10)
-	spriteGlass.x = spriteGlass.width/2
-	spriteGlass.y = windowHeight - spriteGlass.height
-	spriteGlass.anchor.x = .5
-	spriteGlass.anchor.y = 1
+    spriteGlass = new PIXI.Sprite(getTexture("media/glass_full.png"))
+    spriteGlass.id = "glass"
+    spriteGlass.interactive = true
+    spriteGlass.r = 0
+    setSize(spriteGlass, 10)
+    spriteGlass.x = spriteGlass.width/2
+    spriteGlass.y = windowHeight - spriteGlass.height
+    spriteGlass.anchor.x = .5
+    spriteGlass.anchor.y = 1
 
-	stage.addChild(spriteGlass)
-	setMouseListeners(spriteGlass)
-	spriteGlass.visible = false
+    stage.addChild(spriteGlass)
+    setMouseListeners(spriteGlass)
+    spriteGlass.visible = false
 }
 function showEggs() {
 	spriteEggs = new PIXI.Sprite(getTexture("media/eggs.png"))
@@ -395,6 +395,7 @@ function drop(obj) {
 	obj.visible = true
 	obj.dropped = true
 }
+
 function animate() {
 	if (setedup) {
 		if (spriteGlass && spriteGlass.dragging) {
@@ -402,14 +403,7 @@ function animate() {
 			spriteGlass.rotation *= 1.0 + s
 
 			if (!spriteGlass.overturned && Math.abs(spriteGlass.rotation) > 2) {
-				spriteGlass.overturned = true
-				spriteGlass.texture = getTexture("media/glass.png")
-				spriteGlass.empty = true
-				if (hitTestRectangles(spriteGlass, circlePan, 0, 0, spritePan.x, spritePan.y)) {
-					spriteFlour.texture = getTexture("media/flour_with_watter.png")
-
-					spriteTomato.visible = true
-				}
+                emptyGlass()
 			}
 		}
 
@@ -459,7 +453,7 @@ function animate() {
 			fallen(spriteGrater, 0, spriteSheet)
 
 		if (spriteGlass && spriteGlass.dropped)
-			fallen(spriteGlass)
+			fallenDown(spriteGlass, 0, onFallGlass)
 
 		if (spriteSausage && spriteSausage.dropped)
 			fallen(spriteSausage)
@@ -495,8 +489,25 @@ function animate() {
 				}
 			}
 	}
-	requestAnimationFrame(animate)
-	renderer.render(stage)
+    requestAnimationFrame(animate)
+    renderer.render(stage)
+}
+
+function emptyGlass() {
+    spriteGlass.overturned = true
+    spriteGlass.texture = getTexture("media/glass.png")
+    spriteGlass.empty = true
+    if (hitTestRectangles(spriteGlass, circlePan, 0, 0, spritePan.x, spritePan.y)) {
+        spriteFlour.texture = getTexture("media/flour_with_watter.png")
+
+        spriteTomato.visible = true
+    }
+}
+
+function refillGlass() {
+    spriteGlass.overturned = false
+    spriteGlass.texture = getTexture("media/glass_full.png")
+    spriteGlass.empty = false
 }
 
 function recoveryTomato() {
@@ -506,43 +517,83 @@ function recoveryTomato() {
 }
 
 function fallen(obj, rotation=0, sense=spriteBoard, func=null) {
-	var objHeight = obj.anchored ? obj.height/2 : obj.height
-	obj.rotation += rotation
-	obj.onTheBoard = sense && hitTestRectangles(obj, sense)
-	if (obj.onTheBoard && obj.vy > 0) {
-		obj.vy = 0
-	} else if (obj.y + objHeight + obj.vy <= windowHeight) {
+    var objHeight = obj.anchored ? obj.height/2 : obj.height
+    obj.rotation += rotation
+    obj.onTheBoard = sense && hitTestRectangles(obj, sense)
+    if (obj.onTheBoard && obj.vy > 0) {
+        obj.vy = 0
+    } else if (obj.y + objHeight + obj.vy <= windowHeight) {
 
-		obj.x += obj.vx
-		obj.y += obj.vy
-		obj.vy += 2
-		
-		if (obj.empty)
-			return false
+        obj.x += obj.vx
+        obj.y += obj.vy
+        obj.vy += 2
+        
+        if (obj.empty)
+            return false
 
-		if (obj.x < 0) {
-			obj.vx = 0
-			obj.x = 0
-		} else if (obj.x + obj.width > windowWidth) {
-			obj.vx = 0
-			obj.x = windowWidth - obj.width
-		}
-		if (obj.y < 0) {
-			obj.vy = 0
-			obj.y = 0
-		}
-		resize(obj)
+        if (obj.x < 0) {
+            obj.vx = 0
+            obj.x = 0
+        } else if (obj.x + obj.width > windowWidth) {
+            obj.vx = 0
+            obj.x = windowWidth - obj.width
+        }
+        if (obj.y < 0) {
+            obj.vy = 0
+            obj.y = 0
+        }
+        resize(obj)
 
-		return false
-	} else { // упало
-		obj.y = windowHeight - objHeight
-		obj.vy = 0
-	}
-	if (func != null) func()
-	obj.dropped = false
-	//obj.rotation = 0
-	return true
+        return false
+    } else { // упало
+        obj.y = windowHeight - objHeight
+        obj.vy = 0
+    }
+    if (func != null) func()
+    obj.dropped = false
+    //obj.rotation = 0
+    return true
 }
+
+function fallenDown(obj, rotation=0, func=null) {
+    var objHeight = obj.anchored ? obj.height/2 : obj.height
+    obj.rotation += rotation
+    obj.onTheBoard = obj.y < 0
+    if (obj.onTheBoard && obj.vy > 0) {
+        obj.vy = 0
+    } else if (obj.y + objHeight + obj.vy <= windowHeight) {
+
+        obj.x += obj.vx
+        obj.y += obj.vy
+        obj.vy += 2
+        
+        if (obj.empty)
+            return false
+
+        if (obj.x < 0) {
+            obj.vx = 0
+            obj.x = 0
+        } else if (obj.x + obj.width > windowWidth) {
+            obj.vx = 0
+            obj.x = windowWidth - obj.width
+        }
+        if (obj.y < 0) {
+            obj.vy = 0
+            obj.y = 0
+        }
+        resize(obj)
+
+        return false
+    } else { // упало
+        obj.y = windowHeight - objHeight
+        obj.vy = 0
+    }
+    if (func != null) func()
+    obj.dropped = false
+    //obj.rotation = 0
+    return true
+}
+
 function onDragStart(event) {
 	this.data = event.data
 	this.dragging = true
@@ -787,22 +838,35 @@ function cut(knife, obj, count, textures, texture) {
 }
 
 function crashEgg() {
-	spriteEgg.interactive = false
-	spriteEgg.rotation = 0
-	if (!spriteFlour.whithEgg) {
-		spriteEgg.texture = getTexture("media/crashed_egg.png")
-		spriteFlour.whithEgg = false
-	}
-	setTimeout("recoveryEgg()", 2000)
+    spriteEgg.interactive = false
+    spriteEgg.rotation = 0
+    if (!spriteFlour.whithEgg) {
+        spriteEgg.texture = getTexture("media/crashed_egg.png")
+        spriteFlour.whithEgg = false
+    }
+    setTimeout("recoveryEgg()", 2000)
 }
 function recoveryEgg() {
-	spriteEgg.texture = getTexture("media/egg.png")
-	spriteEgg.interactive = true
-	spriteEgg.alpha = 0
-	spriteEgg.x = spriteEgg.defX
-	spriteEgg.y = spriteEgg.defY
-	spriteEgg.rotation = 0
-	spriteEgg.cracked = false
+    spriteEgg.texture = getTexture("media/egg.png")
+    spriteEgg.interactive = true
+    spriteEgg.alpha = 0
+    spriteEgg.x = spriteEgg.defX
+    spriteEgg.y = spriteEgg.defY
+    spriteEgg.rotation = 0
+    spriteEgg.cracked = false
+}
+function onFallGlass() {
+    if (spriteGlass.empty) {
+        spriteGlass.interactive = false
+        setTimeout("recoveryGlass()", 1000)
+    }
+}
+function recoveryGlass() {
+    spriteGlass.interactive = true
+    spriteGlass.x = spriteGlass.width/2
+    spriteGlass.y = windowHeight - spriteGlass.height
+    spriteGlass.rotation = 0
+    refillGlass()
 }
 function hitTestRectangles(r1, r2, parentX1=0, parentY1=0, parentX2=0, parentY2=0) {
 	var hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
