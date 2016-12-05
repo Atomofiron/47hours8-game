@@ -20,6 +20,7 @@ PIXI.utils.TextureCache["media/tomato_crushed.png"]
 PIXI.utils.TextureCache["media/knife.png"]
 PIXI.utils.TextureCache["media/grater.png"]
 PIXI.utils.TextureCache["media/chease.png"]
+PIXI.utils.TextureCache["media/chease_slice.png"]
 PIXI.utils.TextureCache["media/sheet.png"]
 PIXI.utils.TextureCache["media/glass.png"]
 PIXI.utils.TextureCache["media/glass_full.png"]
@@ -342,8 +343,8 @@ function showChease() {
 	stage.addChild(spriteChease)
 	setMouseListeners(spriteGrater)
 	setMouseListeners(spriteChease)
-	spriteGrater.visible = false
-	spriteChease.visible = false
+	// spriteGrater.visible = false
+	// spriteChease.visible = false
 }
 function showKnife() {
 	spriteKnife = new PIXI.Sprite(getTexture("media/knife.png"))
@@ -412,6 +413,7 @@ PIXI.loader
 .add("media/knife.png")
 .add("media/grater.png")
 .add("media/chease.png")
+.add("media/chease_slice.png")
 .add("media/sheet.png")
 .add("media/glass.png")
 .add("media/glass_full.png")
@@ -549,6 +551,10 @@ function animate() {
 		if (spriteGrater && spriteGrater.dropped)
 			fallen(spriteGrater, 0, spriteSheet)
 
+        spriteCheaseSliceGroup.forEach(function(element) {
+            fallen(element)
+        })
+
 		if (spriteGlass && spriteGlass.dropped)
 			fallenDown(spriteGlass, 0, onFallGlass)
 
@@ -585,6 +591,8 @@ function animate() {
 					spriteDough.y = spritePan.y + spriteFlour.y
 				}
 			}
+
+
 	}
     requestAnimationFrame(animate)
     renderer.render(stage)
@@ -816,58 +824,24 @@ function onDragMove(event) {
 				spriteChease.y += dif/2
 				if (spriteChease.width < 20)
 					spriteGrater.empty = true
-			}
-		} else if (this.id == "knife") {
-			this.width = this.maxWidth * (newPosition.x / windowWidth) + this.maxWidth // анимация ножа
+                shred(this, spriteChease, 5, 0, 10)
+            }
+        } else if (this.id == "knife") {
+            this.width = this.maxWidth * (newPosition.x / windowWidth) + this.maxWidth // анимация ножа
 
-			if (spriteEgg.dropped && hitTestRectangles(this, spriteEgg) && velocity > 20) {
-				spriteEgg.texture = getTexture("media/cracked_egg.png")
-				spriteEgg.cracked = true
-				if (hitTestRectangles(spriteEgg, circlePan, 0, 0, spritePan.x, spritePan.y) && !spriteFlour.whithEgg) {
-					spriteFlour.texture = getTexture("media/flour_with_egg.png")
-					spriteFlour.whithEgg = true
+            if (spriteEgg.dropped && hitTestRectangles(this, spriteEgg) && velocity > 20) {
+                spriteEgg.texture = getTexture("media/cracked_egg.png")
+                spriteEgg.cracked = true
+                if (hitTestRectangles(spriteEgg, circlePan, 0, 0, spritePan.x, spritePan.y) && !spriteFlour.whithEgg) {
+                    spriteFlour.texture = getTexture("media/flour_with_egg.png")
+                    spriteFlour.whithEgg = true
 
-					drop(spriteGlass)
-				}
-			}
-			if (spriteTomato && spriteTomato.visible && spriteTomato.sliceCount != 5 && !spriteTomato.crushed) {
-				cut(this, spriteTomato, 5, tomatos, "media/tomato_slice.png", 0, 10)
-			}
-            // if (false && spriteChease && spriteChease.visible && spriteChease.sliceCount != 5 && !spriteChease.crushed) {
-            //     if ((this.x > spriteChease.x + spriteChease.width || this.x < spriteChease.x) &&
-            //         this.y < spriteChease.y && this.y + this.height/2 > spriteChease.y + spriteChease.height && !spriteChease.cutting) {
-            //         spriteChease.cutting = true
-            //         this.cheaseCutX = this.x
-            //         this.cheaseCutY = this.y
-            //     } else if (Math.abs(this.y - this.cheaseCutY) > 50 && spriteChease.cutting) {
-            //         spriteChease.cutting = false
-            //     } else if (spriteChease.cutting &&
-            //         (this.x > spriteChease.x + spriteChease.height && this.cheaseCutX < spriteChease.x ||
-            //             this.cheaseCutX > spriteChease.x + spriteChease.height && this.x < spriteChease.x)) {
-            //         spriteChease.cutting = false
-            //         spriteChease.cutted = true
-
-            //         var spriteCheaseSlice = new PIXI.Sprite(getTexture("media/chease_slice.png"))
-            //         spriteCheaseSlice.interactive = true
-            //         spriteCheaseSlice.offset = spriteChease.sliceCount * 10
-            //         setSize(spriteCheaseSlice, 10)
-            //         spriteCheaseSlice.x = spriteChease.x
-            //         spriteCheaseSlice.y = spriteChease.y + spriteChease.height + spriteCheaseSlice.offset
-            //         spriteCheaseSlice.anchor.x = .5
-            //         spriteCheaseSlice.anchor.y = .5
-            //         spriteCheaseSliceGroup[spriteChease.sliceCount] = spriteCheaseSlice
-            //         stage.addChild(spriteCheaseSlice)
-            //         renderer.render(stage)
-            //         setMouseListeners(spriteCheaseSlice)
-                    
-            //         spriteChease.sliceCount++
-            //         if (spriteChease.sliceCount == 5) {
-            //             spriteSausage.visible = true
-
-            //             stage.removeChild(spriteChease)
-            //             renderer.render(stage)
-            //         }
-            //     }
+                    drop(spriteGlass)
+                }
+            }
+            if (spriteTomato && spriteTomato.visible && spriteTomato.sliceCount != 5 && !spriteTomato.crushed) {
+                cut(this, spriteTomato, 5, tomatos, "media/tomato_slice.png", 0, 10)
+            }
 			if (spriteSausage && spriteSausage.visible && spriteSausage.sliceCount != 5) {
 				cut(this, spriteSausage, 5, sauseges, "media/sausage_slice.png", 10, 0)
 			}
@@ -880,55 +854,84 @@ function onDragMove(event) {
 	}
 }
 function cut(knife, obj, count, textures, texture, offsetX=0, offsetY=0) {
-	if ((knife.x > obj.x + obj.width || knife.x < obj.x) &&
-		knife.y < obj.y && knife.y + knife.height/2 > obj.y + obj.height && !obj.cutting) {
-		obj.cutting = true
-		knife.cutX = knife.x
-		knife.cutY = knife.y
-	} else if (Math.abs(knife.y - knife.cutY) > 50 && obj.cutting) {
-		obj.cutting = false
-	} else if (obj.cutting &&
-		(knife.x > obj.x + obj.height && knife.cutX < obj.x ||
-			knife.cutX > obj.x + obj.height && knife.x < obj.x)) {
-		obj.cutting = false
-		obj.cutted = true
-		if (obj.sliceCount < count-1) // так
-			obj.texture = getTexture(textures[obj.sliceCount+1]) // надо
+    if ((knife.x > obj.x + obj.width || knife.x < obj.x) &&
+        knife.y < obj.y && knife.y + knife.height/2 > obj.y + obj.height && !obj.cutting) {
+        obj.cutting = true
+        knife.cutX = knife.x
+        knife.cutY = knife.y
+    } else if (Math.abs(knife.y - knife.cutY) > 50 && obj.cutting) {
+        obj.cutting = false
+    } else if (obj.cutting &&
+        (knife.x > obj.x + obj.height && knife.cutX < obj.x ||
+            knife.cutX > obj.x + obj.height && knife.x < obj.x)) {
+        obj.cutting = false
+        obj.cutted = true
+        if (obj.sliceCount < count-1) // так
+            obj.texture = getTexture(textures[obj.sliceCount+1]) // надо
 
-		var objSlice = new PIXI.Sprite(getTexture(texture))
-		objSlice.interactive = true
-		objSlice.offsetX = obj.sliceCount * offsetX * 2
-		objSlice.offsetY = obj.sliceCount * offsetY
-		setSize(objSlice, 8)
-		objSlice.x = obj.x + obj.width - objSlice.offsetX
-		objSlice.y = obj.y + obj.height - objSlice.offsetY
-		obj.group[obj.sliceCount] = objSlice
-		stage.addChild(objSlice)
-		setMouseListeners(objSlice)
-		
-		obj.sliceCount++
-		if (obj.sliceCount == count) {
-			stage.removeChild(obj)
-			if (obj.id == "tomato") {
-				spriteSausage.visible = true
+        var objSlice = new PIXI.Sprite(getTexture(texture))
+        objSlice.interactive = true
+        objSlice.offsetX = obj.sliceCount * offsetX * 2
+        objSlice.offsetY = obj.sliceCount * offsetY
+        setSize(objSlice, 8)
+        objSlice.x = obj.x + obj.width - objSlice.offsetX
+        objSlice.y = obj.y + obj.height - objSlice.offsetY
+        obj.group[obj.sliceCount] = objSlice
+        stage.addChild(objSlice)
+        setMouseListeners(objSlice)
+        
+        obj.sliceCount++
+        if (obj.sliceCount == count) {
+            stage.removeChild(obj)
+            if (obj.id == "tomato") {
+                spriteSausage.visible = true
 
-				stage.removeChild(spriteTomato)
-				renderer.render(stage)
-			}
-			if (obj.id == "sausage") {
-				spriteSheet.visible = true
-				spriteFlour.texture = getTexture("media/dough.png")
-				spriteFlour.x -= 20
-				spriteFlour.y -= 20
-				spriteFlour.interactive = true
-				setMouseListeners(spriteFlour)
-				spritePan.whithDough = true
-			}
-		}
+                stage.removeChild(spriteTomato)
+                renderer.render(stage)
+            }
+            if (obj.id == "sausage") {
+                spriteSheet.visible = true
+                spriteFlour.texture = getTexture("media/dough.png")
+                spriteFlour.x -= 20
+                spriteFlour.y -= 20
+                spriteFlour.interactive = true
+                setMouseListeners(spriteFlour)
+                spritePan.whithDough = true
+            }
+        }
 
-		renderer.render(stage)
-	}
+        renderer.render(stage)
+    }
 }
+
+
+
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+
+
+function shred(knife, obj, count, offsetX=0, offsetY=0) {
+    spriteCheaseSliceGroup.group = spriteCheaseSliceGroup
+    var objSlice = new PIXI.Sprite(getTexture("media/chease_slice.png"))
+    var maxOffset = 32
+    var offsetX = getRandomArbitrary(-maxOffset, maxOffset) 
+    var offsetY = getRandomArbitrary(-maxOffset, maxOffset)
+    objSlice.x = obj.x + offsetX
+    objSlice.y = obj.y + offsetY
+    objSlice.vy = -10;
+    // obj.group[obj.sliceCount] = objSlice
+    stage.addChild(objSlice)
+
+    renderer.render(stage)
+}
+
+
+
+
+
 
 function crashEgg() {
     spriteEgg.interactive = false
