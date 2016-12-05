@@ -19,8 +19,8 @@ PIXI.utils.TextureCache["media/tomato_slice.png"]
 PIXI.utils.TextureCache["media/tomato_crushed.png"]
 PIXI.utils.TextureCache["media/knife.png"]
 PIXI.utils.TextureCache["media/grater.png"]
-PIXI.utils.TextureCache["media/chease.png"]
-PIXI.utils.TextureCache["media/chease_slice.png"]
+PIXI.utils.TextureCache["media/cheese.png"]
+PIXI.utils.TextureCache["media/cheese_slice.png"]
 PIXI.utils.TextureCache["media/sheet.png"]
 PIXI.utils.TextureCache["media/glass.png"]
 PIXI.utils.TextureCache["media/glass_full.png"]
@@ -72,14 +72,14 @@ var spriteFlour
 var spritePan
 var spriteEgg
 var circlePan
-var spriteChease
+var spriteCheese
 var spriteGrater
 var spriteGlass
 var spriteSausage
 var spriteKnife
 var spriteDough
 var spriteTomatoSliceGroup = []
-var spriteCheaseSliceGroup = []
+var spriteCheeseSliceGroup = []
 var spriteSausageSliceGroup = []
 var spriteSemgaSliceGroup = []
 var sauseges = ["media/sausage.png","media/sausage1.png","media/sausage2.png","media/sausage3.png","media/sausage4.png",]
@@ -123,7 +123,7 @@ function setup() {
 
 	showOven()
 
-	showChease()
+	showCheese()
 
 	showGlass()
 
@@ -321,7 +321,7 @@ function showDough() {
 	setMouseListeners(spriteDough)
 	spriteDough.visible = false
 }
-function showChease() {
+function showCheese() {
 	spriteGrater = new PIXI.Sprite(getTexture("media/grater.png"))
 	spriteGrater.id = "grater"
 	spriteGrater.interactive = true
@@ -330,21 +330,21 @@ function showChease() {
 	spriteGrater.x = 0
 	spriteGrater.y = 0
 
-	spriteChease = new PIXI.Sprite(getTexture("media/chease.png"))
-	spriteChease.id = "chease"
-	spriteChease.interactive = true
-	spriteChease.fixed = true
-	setSize(spriteChease, 15)
-	spriteChease.vy = 0
-	spriteChease.x = 300
-	spriteChease.y = windowHeight - spriteChease.height - 50
+	spriteCheese = new PIXI.Sprite(getTexture("media/cheese.png"))
+	spriteCheese.id = "cheese"
+	spriteCheese.interactive = true
+	spriteCheese.fixed = true
+	setSize(spriteCheese, 15)
+	spriteCheese.vy = 0
+	spriteCheese.x = 300
+	spriteCheese.y = windowHeight - spriteCheese.height - 50
 
 	stage.addChild(spriteGrater)
-	stage.addChild(spriteChease)
+	stage.addChild(spriteCheese)
 	setMouseListeners(spriteGrater)
-	setMouseListeners(spriteChease)
+	setMouseListeners(spriteCheese)
 	// spriteGrater.visible = false
-	// spriteChease.visible = false
+	// spriteCheese.visible = false
 }
 function showKnife() {
 	spriteKnife = new PIXI.Sprite(getTexture("media/knife.png"))
@@ -412,8 +412,8 @@ PIXI.loader
 .add("media/tomato_crushed.png")
 .add("media/knife.png")
 .add("media/grater.png")
-.add("media/chease.png")
-.add("media/chease_slice.png")
+.add("media/cheese.png")
+.add("media/cheese_slice.png")
 .add("media/sheet.png")
 .add("media/glass.png")
 .add("media/glass_full.png")
@@ -477,7 +477,7 @@ function animate() {
 		}
 		if (ready) {
 			spriteGrater.visible = true
-			spriteChease.visible = true
+			spriteCheese.visible = true
 			if (!spriteDough.aleady && spriteGrater.empty) {
 				spriteDough.texture = getTexture("media/pizza_filled.png")
 				spriteDough.aleady = true
@@ -545,13 +545,13 @@ function animate() {
 		if (spriteTomato && spriteTomato.dropped)
 			fallen(spriteTomato)
 
-		if (spriteChease && spriteChease.dropped)
-			fallen(spriteChease)
+		if (spriteCheese && spriteCheese.dropped)
+			fallen(spriteCheese)
 
 		if (spriteGrater && spriteGrater.dropped)
 			fallen(spriteGrater, 0, spriteSheet)
 
-        spriteCheaseSliceGroup.forEach(function(element) {
+        spriteCheeseSliceGroup.forEach(function(element) {
             fallen(element)
         })
 
@@ -815,16 +815,16 @@ function onDragMove(event) {
 				spriteOven.opening = true
 				//spriteDough.texture ...
 			}
-		} else if (this.id == "chease") {
-			if (spriteChease.x > spriteSheet.x && hitTestCenterRectangles(spriteChease, spriteGrater) && spriteChease.width > 0) {
+		} else if (this.id == "cheese") {
+			if (spriteCheese.x > spriteSheet.x && hitTestCenterRectangles(spriteCheese, spriteGrater) && spriteCheese.width > 0) {
 				var dif = Math.abs(difY/10)
-				spriteChease.width -= dif * (spriteChease.width / spriteChease.height)
-				spriteChease.height -= dif
-				spriteChease.x += dif/2 * (spriteChease.width / spriteChease.height)
-				spriteChease.y += dif/2
-				if (spriteChease.width < 20)
+				spriteCheese.width -= dif * (spriteCheese.width / spriteCheese.height)
+				spriteCheese.height -= dif
+				spriteCheese.x += dif/2 * (spriteCheese.width / spriteCheese.height)
+				spriteCheese.y += dif/2
+				if (spriteCheese.width < 20)
 					spriteGrater.empty = true
-                shred(this, spriteChease, 5, 0, 10)
+                shred(this, spriteCheese, 5, 0, 10)
             }
         } else if (this.id == "knife") {
             this.width = this.maxWidth * (newPosition.x / windowWidth) + this.maxWidth // анимация ножа
@@ -914,8 +914,8 @@ function getRandomArbitrary(min, max) {
 
 
 function shred(knife, obj, count, offsetX=0, offsetY=0) {
-    spriteCheaseSliceGroup.group = spriteCheaseSliceGroup
-    var objSlice = new PIXI.Sprite(getTexture("media/chease_slice.png"))
+    spriteCheeseSliceGroup.group = spriteCheeseSliceGroup
+    var objSlice = new PIXI.Sprite(getTexture("media/cheese_slice.png"))
     var maxOffset = 32
     var offsetX = getRandomArbitrary(-maxOffset, maxOffset) 
     var offsetY = getRandomArbitrary(-maxOffset, maxOffset)
