@@ -552,7 +552,8 @@ function animate() {
 			fallen(spriteGrater, 0, spriteSheet)
 
         spriteCheeseSliceGroup.forEach(function(element) {
-            fallen(element)
+            if (element.dropped)
+                fallen(element, 0.1, spriteSheet)
         })
 
 		if (spriteGlass && spriteGlass.dropped)
@@ -914,18 +915,19 @@ function getRandomArbitrary(min, max) {
 
 
 function shred(knife, obj, count, offsetX=0, offsetY=0) {
-    spriteCheeseSliceGroup.group = spriteCheeseSliceGroup
-    var objSlice = new PIXI.Sprite(getTexture("media/cheese_slice.png"))
+    var objSlice = new PIXI.Sprite(getTexture("media/crashed_egg.png"))
     var maxOffset = 32
     var offsetX = getRandomArbitrary(-maxOffset, maxOffset) 
     var offsetY = getRandomArbitrary(-maxOffset, maxOffset)
     objSlice.x = obj.x + offsetX
     objSlice.y = obj.y + offsetY
-    objSlice.vy = -10;
+    // objSlice.vy = -1;
+    objSlice.dropped = true
+    objSlice.group = spriteCheeseSliceGroup
     // obj.group[obj.sliceCount] = objSlice
     stage.addChild(objSlice)
+    spriteCheeseSliceGroup.push(objSlice)
 
-    renderer.render(stage)
 }
 
 
